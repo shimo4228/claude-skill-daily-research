@@ -14,10 +14,10 @@ fi
 
 # === 変数 ===
 DATE=$(date +%Y-%m-%d)
-PROJECT_DIR="$HOME/MyAI_Lab/daily-research"
+PROJECT_DIR="$HOME/MyAI_Lab/daily-research-mem0-test"
 LOG_DIR="$PROJECT_DIR/logs"
 LOG_FILE="$LOG_DIR/$DATE.log"
-LOCK_FILE="$PROJECT_DIR/.daily-research.lock"
+LOCK_FILE="$PROJECT_DIR/.daily-research-mem0.lock"
 
 mkdir -p "$LOG_DIR"
 chmod 700 "$LOG_DIR"
@@ -194,6 +194,24 @@ if ! "$CLAUDE_CMD" --version >> "$LOG_FILE" 2>&1; then
   exit 1
 fi
 
+# === MCP ヘルスチェック ===
+log "=== MCP health check ==="
+MCP_PROBE_EXIT=0
+timeout 60 "$CLAUDE_CMD" -p "Say OK" \
+  --max-turns 1 \
+  --model haiku \
+  --output-format json \
+  --no-session-persistence \
+  --permission-mode default \
+  2>> "$LOG_FILE" > /dev/null || MCP_PROBE_EXIT=$?
+
+if [ $MCP_PROBE_EXIT -ne 0 ]; then
+  log "ERROR: MCP health check failed (exit=$MCP_PROBE_EXIT). Mem0 MCP may be hanging."
+  notify "MCP ヘルスチェック失敗" "Daily Research Mem0"
+  exit 1
+fi
+log "MCP health check passed"
+
 # === 実行 ===
 cd "$PROJECT_DIR"
 
@@ -294,10 +312,10 @@ log "=== Pass 2: Research & writing (Sonnet) ==="
 
 PASS2_EXIT=0
 PASS2_JSON=""
-PASS2_JSON=$(run_claude -p "$TASK_PROMPT" \
+PASS2_JSON=$(timeout 900 "$CLAUDE_CMD" -p "$TASK_PROMPT" \
   --permission-mode default \
   --append-system-prompt-file prompts/research-protocol.md \
-  --allowedTools "WebSearch,WebFetch,Read,Write,Edit,Glob,Grep" \
+  --allowedTools "WebSearch,WebFetch,Read,Write,Edit,Glob,Grep,mcp__mem0__search-memories,mcp__mem0__add-memory" \
   --max-turns 40 \
   --model sonnet \
   --output-format json \
