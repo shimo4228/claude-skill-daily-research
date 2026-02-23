@@ -129,6 +129,17 @@ PYTHON
   [[ "$result" == *"turns=0"* ]]
 }
 
+@test "log_summary: empty array gives defaults" {
+  local json_input='[]'
+
+  local result
+  result=$(echo "$json_input" | python3 "$TEST_TMPDIR/log_summary.py" "Empty")
+
+  [[ "$result" != *"parse error"* ]]
+  [[ "$result" == *"SUMMARY Empty:"* ]]
+  [[ "$result" == *"cost=\$0.0000"* ]]
+}
+
 @test "log_summary: invalid JSON gives parse error" {
   local json_input='not-json'
 
