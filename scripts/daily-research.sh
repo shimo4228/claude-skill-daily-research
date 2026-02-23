@@ -4,6 +4,8 @@ set -euo pipefail
 # === 環境サニタイズ ===
 # APIキーが設定されていると従量課金になるため確実に除去
 unset ANTHROPIC_API_KEY
+# CLAUDECODEが残っているとネストチェックや起動挙動が変わるため除去
+unset CLAUDECODE 2>/dev/null || true
 
 # launchd環境はPATHが最小限。必要なパスを明示的に設定
 export PATH="/opt/homebrew/bin:/usr/local/bin:$PATH"
@@ -37,8 +39,9 @@ notify() {
 # claude -p の実行ラッパー
 # CLAUDE_CMD は認証チェック時に絶対パスへ解決済み
 # タイムアウトは --max-turns で制御（gtimeout はプロセスグループ分離で claude を停止させるため不使用）
+# < /dev/null: MCP の stdio 通信とターミナル stdin の競合を防止
 run_claude() {
-  "$CLAUDE_CMD" "$@"
+  "$CLAUDE_CMD" "$@" < /dev/null
 }
 
 # stream-json の NDJSON を集約するパーサー（python3 -c 用コード）
@@ -203,7 +206,7 @@ timeout 60 "$CLAUDE_CMD" -p "Say OK" \
   --output-format json \
   --no-session-persistence \
   --permission-mode default \
-  2>> "$LOG_FILE" > /dev/null || MCP_PROBE_EXIT=$?
+  < /dev/null 2>> "$LOG_FILE" > /dev/null || MCP_PROBE_EXIT=$?
 
 if [ $MCP_PROBE_EXIT -ne 0 ]; then
   log "ERROR: MCP health check failed (exit=$MCP_PROBE_EXIT). Mem0 MCP may be hanging."
@@ -320,7 +323,7 @@ PASS2_JSON=$(timeout 900 "$CLAUDE_CMD" -p "$TASK_PROMPT" \
   --model sonnet \
   --output-format json \
   --no-session-persistence \
-  2>> "$LOG_FILE") || PASS2_EXIT=$?
+  < /dev/null 2>> "$LOG_FILE") || PASS2_EXIT=$?
 
 # Pass 2 の JSON をログに記録
 if [ -n "$PASS2_JSON" ]; then
