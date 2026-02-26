@@ -120,6 +120,22 @@ validate_theme_json() {
   result=$(echo "$raw" | python3 -c "
 import sys, json, re
 
+# config.toml からトラック名を動的取得（tomllib は Python 3.11+）
+try:
+    import tomllib
+except ImportError:
+    import tomli as tomllib
+
+config_path = sys.argv[1]
+with open(config_path, 'rb') as f:
+    config = tomllib.load(f)
+valid_tracks = set(config.get('tracks', {}).keys())
+expected_count = len(valid_tracks)
+
+if expected_count == 0:
+    print('No tracks defined in config.toml', file=sys.stderr)
+    sys.exit(1)
+
 raw = sys.stdin.read().strip()
 
 # マークダウンコードフェンスを除去
@@ -139,8 +155,8 @@ except json.JSONDecodeError as e:
     sys.exit(1)
 
 themes = d.get('themes', [])
-if not isinstance(themes, list) or len(themes) != 2:
-    print(f'Expected 2 themes, got {len(themes) if isinstance(themes, list) else type(themes).__name__}', file=sys.stderr)
+if not isinstance(themes, list) or len(themes) != expected_count:
+    print(f'Expected {expected_count} themes, got {len(themes) if isinstance(themes, list) else type(themes).__name__}', file=sys.stderr)
     sys.exit(1)
 
 for i, t in enumerate(themes):
@@ -148,8 +164,8 @@ for i, t in enumerate(themes):
         if k not in t:
             print(f'Theme {i}: missing key \"{k}\"', file=sys.stderr)
             sys.exit(1)
-    if t['track'] not in ('tech', 'personal'):
-        print(f'Theme {i}: invalid track \"{t[\"track\"]}\"', file=sys.stderr)
+    if t['track'] not in valid_tracks:
+        print(f'Theme {i}: invalid track \"{t[\"track\"]}\" (valid: {sorted(valid_tracks)})', file=sys.stderr)
         sys.exit(1)
     if not isinstance(t['slug'], str) or not re.fullmatch(r'[a-z0-9-]+', t['slug']):
         print(f'Theme {i}: invalid slug \"{t.get(\"slug\")}\"', file=sys.stderr)
@@ -163,7 +179,7 @@ for i, t in enumerate(themes):
         sys.exit(1)
 
 print(json.dumps(d, ensure_ascii=False))
-" 2>> "$LOG_FILE") || return 1
+" "$PROJECT_DIR/config.toml" 2>> "$LOG_FILE") || return 1
   echo "$result"
 }
 
@@ -300,9 +316,9 @@ if [ "$USE_FALLBACK" = true ]; then
 
 1. config.toml を読み込む
 2. past_topics.json で過去テーマを確認する
-3. テックトレンドとパーソナル関心の2テーマを選定する
+3. config.toml で定義されている全トラックのテーマを選定する
 4. 各テーマについて多段階リサーチを実行する
-5. レポートを2本生成し、Obsidian vault に保存する
+5. 各テーマのレポートを生成し、Obsidian vault に保存する
 6. past_topics.json を更新する
 
 research-protocol.md に記載されたプロトコルに厳密に従ってください。"
@@ -348,7 +364,7 @@ PASS2_JSON=$(CLAUDE_TIMEOUT=900 run_claude -p "$TASK_PROMPT" \
   --permission-mode default \
   --append-system-prompt-file prompts/research-protocol.md \
   --allowedTools "$PASS2_TOOLS" \
-  --max-turns 40 \
+  --max-turns 55 \
   --model sonnet \
   --output-format json \
   --no-session-persistence \
@@ -389,15 +405,15 @@ if [ $PASS2_EXIT -eq 0 ]; then
   log "=== Completed successfully ==="
   notify "今朝のリサーチレポートが完成しました" "Daily Research"
 
-  # === 品質評価 (non-fatal) ===
-  if [ -x "$PROJECT_DIR/scripts/eval-run.sh" ]; then
-    log "=== Starting evaluation ==="
-    "$PROJECT_DIR/scripts/eval-run.sh" "$DATE" >> "$LOG_FILE" 2>&1 || {
-      log "WARN: Evaluation failed (non-fatal)"
-    }
-  else
-    log "WARN: eval-run.sh not found or not executable, skipping evaluation"
-  fi
+  # === 品質評価 (運用停止中: コスト対効果が低いため) ===
+  # if [ -x "$PROJECT_DIR/scripts/eval-run.sh" ]; then
+  #   log "=== Starting evaluation ==="
+  #   "$PROJECT_DIR/scripts/eval-run.sh" "$DATE" >> "$LOG_FILE" 2>&1 || {
+  #     log "WARN: Evaluation failed (non-fatal)"
+  #   }
+  # else
+  #   log "WARN: eval-run.sh not found or not executable, skipping evaluation"
+  # fi
 else
   log "=== Failed with exit code $PASS2_EXIT ==="
   notify "リサーチ実行に失敗しました。ログを確認してください。" "Daily Research Error"

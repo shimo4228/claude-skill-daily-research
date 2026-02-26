@@ -101,14 +101,13 @@ tail -f logs/$(date +%Y-%m-%d).log
 - `templates/report-template.md` は出力フォーマットの定義
 - プロンプトファイルは全て日本語。出力言語の変更は protocol.md を修正
 
-### 評価フレームワーク (LLM-as-Judge)
+### 評価フレームワーク (LLM-as-Judge) — 運用停止中
 
-- **eval-run.sh**: Pass 2 成功後に自動実行。2記事 × 6次元 = 12 Opus calls/日
+コスト対効果が低いため運用停止。`daily-research.sh` の呼び出しをコメントアウト済み。
+コード（`evals/` ディレクトリ、`scripts/eval-run.sh`）は削除せず保持。再開時はコメント解除で復旧可能。
+
 - **6次元ルーブリック**: Factual Grounding / Depth / Coherence / Specificity / Novelty / Actionability（各1-5点、30点満点）
 - **スコアログ**: `evals/scores.jsonl` に追記（.gitignore）。スキーマは `scores.example.jsonl` を参照
-- **pipeline_version**: 機能変更時に `eval-run.sh` の `PIPELINE_VERSION` 変数を手動で更新する
-- **統計規律**: n < 20 の比較は「暫定シグナル」。バージョン比較は n ≥ 20 から有効とみなす
-- 評価失敗は daily-research.sh の exit code に影響しない（non-fatal）
 
 ### Mem0 MCP 統合
 
@@ -124,5 +123,7 @@ tail -f logs/$(date +%Y-%m-%d).log
 
 - 本番稼働中。毎朝 AM 5:00 に launchd で自動実行
 - Opus テーマ選定 + Sonnet リサーチ・執筆の2パス方式（E2E 検証済み、2026-02-20）
+- 3トラック構成: tech / personal / social（トラック数は config.toml から動的取得）
 - Mem0 MCP 統合済み（`feature/mem0-stability-test` → main マージ、2026-02-26）
 - Pass 1 失敗時は Sonnet 一括フォールバックで継続稼働
+- 評価フレームワーク (LLM-as-Judge) は運用停止中

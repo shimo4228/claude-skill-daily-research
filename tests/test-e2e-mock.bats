@@ -32,9 +32,14 @@ setup() {
 [general]
 vault_path = "/tmp/mock-vault"
 
-[tracks]
-tech = "テクノロジー"
-personal = "パーソナル"
+[tracks.tech]
+name = "Tech Trends"
+
+[tracks.personal]
+name = "Personal Interests"
+
+[tracks.social]
+name = "社会課題 x Tech"
 EOF
 
   # past_topics.json のミニマル版
@@ -95,7 +100,7 @@ if [[ "$MODEL" == "opus" ]]; then
       # --output-format stream-json --verbose の NDJSON 形式。parse-stream.py が処理する
       cat << 'JSON'
 {"type":"assistant","message":{"model":"claude-haiku-4-5-20251001","content":[{"type":"tool_use","name":"WebSearch","id":"toolu_mock01","input":{"query":"mock search"}}]}}
-{"type":"result","subtype":"success","is_error":false,"duration_ms":5000,"duration_api_ms":4500,"num_turns":5,"total_cost_usd":0.25,"usage":{"input_tokens":1000,"output_tokens":500,"cache_creation_input_tokens":0,"cache_read_input_tokens":0},"result":"{\"themes\": [{\"track\": \"tech\", \"topic\": \"Mock Tech Topic for E2E Testing\", \"slug\": \"mock-tech-topic\", \"score\": 85, \"rationale\": \"E2E test rationale\"}, {\"track\": \"personal\", \"topic\": \"Mock Personal Topic for E2E Testing\", \"slug\": \"mock-personal-topic\", \"score\": 80, \"rationale\": \"E2E test rationale\"}]}"}
+{"type":"result","subtype":"success","is_error":false,"duration_ms":5000,"duration_api_ms":4500,"num_turns":5,"total_cost_usd":0.25,"usage":{"input_tokens":1000,"output_tokens":500,"cache_creation_input_tokens":0,"cache_read_input_tokens":0},"result":"{\"themes\": [{\"track\": \"tech\", \"topic\": \"Mock Tech Topic for E2E Testing\", \"slug\": \"mock-tech-topic\", \"score\": 85, \"rationale\": \"E2E test rationale\"}, {\"track\": \"personal\", \"topic\": \"Mock Personal Topic for E2E Testing\", \"slug\": \"mock-personal-topic\", \"score\": 80, \"rationale\": \"E2E test rationale\"}, {\"track\": \"social\", \"topic\": \"Mock Social Topic for E2E Testing\", \"slug\": \"mock-social-topic\", \"score\": 82, \"rationale\": \"E2E test rationale\"}]}"}
 JSON
       exit 0
       ;;
@@ -181,6 +186,7 @@ get_log() {
 
   echo "$sonnet_prompt" | grep -q "mock-tech-topic"
   echo "$sonnet_prompt" | grep -q "mock-personal-topic"
+  echo "$sonnet_prompt" | grep -q "mock-social-topic"
   echo "$sonnet_prompt" | grep -q "選定済みテーマ"
 }
 
@@ -217,6 +223,9 @@ get_log() {
 
   # フォールバック時はテーマ選定ステップが含まれる
   echo "$sonnet_prompt" | grep -q "テーマを選定する"
+
+  # 動的トラック表現が含まれる
+  echo "$sonnet_prompt" | grep -q "config.toml"
 
   # 選定済みテーマ セクションは含まれない
   ! echo "$sonnet_prompt" | grep -q "選定済みテーマ"

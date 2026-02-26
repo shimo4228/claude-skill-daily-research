@@ -1,6 +1,6 @@
 ---
 date: {date}
-category: {track}  # "tech" or "personal"
+category: {track}  # track name from config.toml
 tags: [{tag1}, {tag2}, ...]
 topic: "{topic_title}"
 sources: {source_count}

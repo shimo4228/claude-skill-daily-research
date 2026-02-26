@@ -42,6 +42,29 @@ scoring_criteria = [
   { name = "Tech x Body intersection", weight = 20, desc = "Intersection of technology and embodiment" },
 ]
 
+[tracks.social]
+name = "社会課題 x Tech"
+focus = "テクノロジーで解決可能な社会的課題。シビックテック、デジタル包摂、健康格差、気候変動、教育アクセス"
+sources = [
+  "Stanford Social Innovation Review 最新記事",
+  "MIT Technology Review (social impact, climate, health)",
+  "Code for Japan / Code for America ブログ",
+  "デジタル庁 プレスリリース",
+  "arXiv cs.CY (Computers and Society) 新着",
+]
+domains = [
+  "Civic Tech", "Digital Inclusion", "Health Equity",
+  "Climate Tech", "Education Technology",
+  "Disaster Preparedness", "Aging Society", "Accessibility",
+]
+scoring_criteria = [
+  { name = "Novelty", weight = 20, desc = "No similar theme in past_topics.json" },
+  { name = "Social urgency", weight = 25, desc = "A pressing problem affecting many people" },
+  { name = "Tech solvability", weight = 25, desc = "Technology can make a concrete difference" },
+  { name = "Buildability", weight = 20, desc = "Could build with Python/Swift/TypeScript/iOS" },
+  { name = "Whisper trend", weight = 10, desc = "An emerging tech x social intersection not yet widely explored" },
+]
+
 [user_profile]
 skills = ["Python", "Swift", "TypeScript", "iOS development"]
 interests = ["AI/ML", "Agents", "Embodied Cognition", "Buddhism", "Meditation", "Free Energy Principle"]
