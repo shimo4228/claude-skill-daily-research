@@ -42,27 +42,39 @@ scoring_criteria = [
   { name = "Tech x Body intersection", weight = 20, desc = "Intersection of technology and embodiment" },
 ]
 
-[tracks.social]
-name = "社会課題 x Tech"
-focus = "テクノロジーで解決可能な社会的課題。シビックテック、デジタル包摂、健康格差、気候変動、教育アクセス"
+[tracks.ai_dev]
+name = "AI-Era Developer Strategy"
+focus = "AI search optimization (AIO/GEO) and developer authenticity. Content design for LLM discoverability, personal branding in the AI era, Contemplative AI agent design, and AKC (Agent Knowledge Cycle) practice and evolution"
+context = """\
+User's own projects. When selecting themes or researching, WebFetch each repo's README for current state.
+
+- Contemplative-agent: https://github.com/shimo4228/contemplative-agent-rules
+  Applies CCAI clauses (Laukkonen et al. 2025) to AI agent design
+- Contemplative-agent data: https://github.com/shimo4228/contemplative-agent-data
+- AKC (Agent Knowledge Cycle): https://github.com/shimo4228/agent-knowledge-cycle
+  6-phase knowledge lifecycle framework for AI agents\
+"""
 sources = [
-  "Stanford Social Innovation Review 最新記事",
-  "MIT Technology Review (social impact, climate, health)",
-  "Code for Japan / Code for America ブログ",
-  "デジタル庁 プレスリリース",
-  "arXiv cs.CY (Computers and Society) 新着",
+  "Hacker News (AI search, LLM, developer branding)",
+  "arXiv cs.IR, cs.AI new papers (generative engine optimization, retrieval)",
+  "Google Search Central Blog / Search Engine Journal",
+  "IndieHackers / Dev.to (developer authenticity, personal branding)",
+  "Semantic Scholar (contemplative AI, AI alignment, knowledge management)",
 ]
 domains = [
-  "Civic Tech", "Digital Inclusion", "Health Equity",
-  "Climate Tech", "Education Technology",
-  "Disaster Preparedness", "Aging Society", "Accessibility",
+  "AI Search Optimization", "AIO", "GEO (Generative Engine Optimization)",
+  "LLM Search", "RAG", "Content Strategy",
+  "Developer Authenticity", "Personal Branding",
+  "Contemplative AI", "Contemplative-agent",
+  "AKC (Agent Knowledge Cycle)", "Agent Knowledge Management",
+  "AI Alignment", "Constitutional AI",
 ]
 scoring_criteria = [
-  { name = "Novelty", weight = 20, desc = "No similar theme in past_topics.json" },
-  { name = "Social urgency", weight = 25, desc = "A pressing problem affecting many people" },
-  { name = "Tech solvability", weight = 25, desc = "Technology can make a concrete difference" },
-  { name = "Buildability", weight = 20, desc = "Could build with Python/Swift/TypeScript/iOS" },
-  { name = "Whisper trend", weight = 10, desc = "An emerging tech x social intersection not yet widely explored" },
+  { name = "Novelty", weight = 25, desc = "No similar theme in past_topics.json" },
+  { name = "Momentum", weight = 25, desc = "An actively evolving technology, market, or discussion right now" },
+  { name = "Contemplative/AKC applicability", weight = 25, desc = "Can be applied to Contemplative-agent or AKC design and improvement" },
+  { name = "Buildability", weight = 15, desc = "Could build something with Python/Swift/TypeScript" },
+  { name = "Whisper trend", weight = 10, desc = "A change not yet noticed by most developers" },
 ]
 
 [user_profile]
