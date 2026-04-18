@@ -15,7 +15,10 @@ Autonomous daily research powered by `claude -p` (Claude Code's non-interactive 
 
 - **Scheduled daily execution** — macOS `launchd` (included) or any cron / systemd setup
 - **Manual one-shot run** — `./scripts/daily-research.sh` or invoke via `/daily-research` after installing as a Claude Code skill
-- **Background of the skill** — see [AKC ADR-0010](https://github.com/shimo4228/agent-knowledge-cycle/blob/main/docs/adr/0010-human-cognitive-resource-as-central-constraint.md) for the signal-first Research philosophy this implements
+
+## Design philosophy
+
+Signal-first intake. The theme selector admits topics only if they would meaningfully change what the reader acts on the next day; lower-signal candidates are dropped at the filter rather than stored and digested later. The pipeline's capacity is defined by human attention, not by source count — so the upstream filter, not the downstream storage, is where quality is enforced.
 
 ## Execution
 
@@ -40,8 +43,3 @@ After cloning, Claude Code recognizes `SKILL.md` and the skill becomes invocable
 - [docs/RUNBOOK.md](docs/RUNBOOK.md) / [docs/RUNBOOK.ja.md](docs/RUNBOOK.ja.md) — operations guide
 - [docs/CONTRIB.md](docs/CONTRIB.md) / [docs/CONTRIB.ja.md](docs/CONTRIB.ja.md) — development guide
 - [config.example.toml](config.example.toml) — configuration template
-
-## Related
-
-- [AKC ADR-0010 Human Cognitive Resource as Central Constraint](https://github.com/shimo4228/agent-knowledge-cycle/blob/main/docs/adr/0010-human-cognitive-resource-as-central-constraint.md) — the design philosophy this skill implements: Research as signal-first, intake filtered for personal relevance
-- [Agent Knowledge Cycle (AKC)](https://github.com/shimo4228/agent-knowledge-cycle) — the broader knowledge cycle this skill sits inside
