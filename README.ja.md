@@ -60,11 +60,20 @@ launchd (AM 5:00)
 | macOS | スケジューリングに `launchd` を使用（Linux の場合は `cron` や `systemd` に適宜変更） |
 | Obsidian (任意) | Markdown 対応ツールなら何でも可 |
 
+## Claude Code skill としてインストール
+
+```bash
+git clone https://github.com/shimo4228/claude-skill-daily-research.git \
+  ~/.claude/skills/daily-research
+```
+
+このリポジトリはルートに [`SKILL.md`](SKILL.md) マニフェストを備えているため、Claude Code が skill として認識します。clone 後は `/daily-research` で手動実行するか、下記の「クイックスタート」の launchd 手順で自動実行を設定してください。Linux の場合は launchd 部分を cron か systemd に置き換えます。
+
 ## クイックスタート
 
 ```bash
 # 1. クローン
-git clone https://github.com/shimo4228/daily-research.git
+git clone https://github.com/shimo4228/claude-skill-daily-research.git daily-research
 cd daily-research
 
 # 2. 設定

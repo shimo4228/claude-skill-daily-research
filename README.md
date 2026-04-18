@@ -60,11 +60,20 @@ The key insight: Claude Code's `-p` flag turns it into a fully autonomous resear
 | macOS | Uses `launchd` for scheduling (Linux users: adapt to `cron` or `systemd`) |
 | Obsidian (optional) | Any markdown-compatible tool works |
 
+## Install as a Claude Code skill
+
+```bash
+git clone https://github.com/shimo4228/claude-skill-daily-research.git \
+  ~/.claude/skills/daily-research
+```
+
+The repo ships a [`SKILL.md`](SKILL.md) manifest at root, so Claude Code recognizes it as a skill. After cloning you can invoke it manually as `/daily-research`, or set up scheduled execution — see "Quick Start" below for launchd (macOS). For Linux, swap the launchd step for cron or systemd.
+
 ## Quick Start
 
 ```bash
 # 1. Clone
-git clone https://github.com/shimo4228/daily-research.git
+git clone https://github.com/shimo4228/claude-skill-daily-research.git daily-research
 cd daily-research
 
 # 2. Configure
