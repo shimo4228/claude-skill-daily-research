@@ -37,7 +37,8 @@ daily-research/
 │   │                             #   Step 3 テーマ選別 = ADR-0010）
 │   └── clarity-review-protocol.md # 呼2 fresh-context clarity 改稿プロトコル（ADR-0010）
 ├── templates/
-│   └── report-template.md      # 解説レポートの記述規律 + 固定 2 節（YAML frontmatter 付き）
+│   ├── report-template.md      # 解説レポートの記述規律 + 固定 2 節（YAML frontmatter 付き）
+│   └── report-template-edge.md # edge line 専用の節構成（手筋収穫型、ADR-0015）
 ├── state/                      # line 別 diff-first 状態（watched-sources.md / playbook.md、.gitignore）
 ├── graph.jsonld                # 旧 concept cluster graph — 凍結アーカイブ（増分停止、ADR-0008）
 ├── config.toml                 # line=repo マッピング・context_files・self_signals・出力設定（.gitignore）
@@ -160,9 +161,12 @@ tail -f logs/$(date +%Y-%m-%d).log
 
 - 出力先: `{vault_path}/{output_dir}/{date}_{track}_{slug}.md`（flat dir — ctl-015 /
   ctl-016 / wiki ingest が前提にする）
-- **本文は自由形式** (ADR-0009)。ただし記述規律 3 点 (冒頭に結論 / 初見の読者向けの
-  背景 / 全 claim に as-of 日付と事実・解釈の分離) を課す (ADR-0014 で 5 点から縮約) —
-  正本は `templates/report-template.md`
+- **本文は自由形式** (ADR-0009)。ただし記述規律 3 点 (冒頭は外部の出来事から / 初見の
+  読者向けの背景 / 全 claim に as-of 日付と事実・解釈の分離) と文体規律 6 項目
+  (プロトコル Step 5、ADR-0015) を課す — 正本は `templates/report-template.md`。
+  line は `[tracks.<x>].template` で節構成を上書きできる (省略時は共通テンプレ、
+  読めないパスは実行時に既定へ fallback — ADR-0015。現在 edge が
+  `templates/report-template-edge.md` を使用)
 - 固定節は末尾 2 つのみ (ctl-016 の機械検査対象): **機会メモ**（日付付き締切を持つ
   機会だけを 何を / どこで / 失効日 の 3 行定型で。無い日は「なし」）と
   **ソース**（最低 5 件、全 URL run 内解決済み）。ctl-016 の検査は非対称: `## ソース`
@@ -179,7 +183,8 @@ tail -f logs/$(date +%Y-%m-%d).log
   ソース節/機会メモ/frontmatter の変更は禁止)。品質バーを広げる改稿は入れない
 - `templates/report-template.md` は記述規律と固定 2 節の定義。**固定節の見出しを
   変えるときは ctl-016 の検査 (`dr_pipeline.py` の `ARTICLE_SECTIONS` = 機会メモ、および
-  `## ソース` の別建て hard check) を必ず同期する**
+  `## ソース` の別建て hard check) を必ず同期する** — per-line テンプレート
+  (`templates/report-template-edge.md` 等) にも固定 2 節は同じ形で必要
 - プロンプトファイルは全て日本語
 
 ### 過去に試行・棄却した機能

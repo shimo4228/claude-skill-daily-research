@@ -58,6 +58,11 @@ def _load_tracks(config_path):
                 f"[tracks.{name}].daily must be a boolean (true/false), "
                 f"got {v['daily']!r}"
             )
+        # template は project 相対パスの文字列限定 (per-track テンプレート上書き)。
+        if isinstance(v, dict) and "template" in v and not isinstance(v["template"], str):
+            raise ValueError(
+                f"[tracks.{name}].template must be a string path, got {v['template']!r}"
+            )
     return cfg, tracks
 
 
@@ -137,6 +142,31 @@ def cmd_report_dir(argv):
     vault = general.get("vault_path", "")
     output_dir = general.get("output_dir", "")
     print(f"{vault}/{output_dir}" if vault and output_dir else "")
+    return 0
+
+
+# --- template-path <config_path> <track>: line のレポートテンプレート相対パスを出力 ---
+# [tracks.<x>].template があればそれ、無ければ既定の templates/report-template.md。
+# パスは config 記述のまま (project 相対) — 存在検査は呼び出し側 (shell) が cat の
+# 失敗として検出し、既定テンプレートへ fallback する。
+DEFAULT_TEMPLATE = "templates/report-template.md"
+
+
+def cmd_template_path(argv):
+    if len(argv) < 2:
+        print("usage: template-path <config_path> <track>", file=sys.stderr)
+        return 64
+    config_path, track = argv[:2]
+    try:
+        _, tracks = _load_tracks(config_path)
+    except ValueError as e:
+        print(str(e), file=sys.stderr)
+        return 1
+    v = tracks.get(track)
+    if not isinstance(v, dict):
+        print(f"unknown track: {track}", file=sys.stderr)
+        return 1
+    print(v.get("template") or DEFAULT_TEMPLATE)
     return 0
 
 
@@ -854,6 +884,7 @@ COMMANDS = {
     "log-summary": cmd_log_summary,
     "vault-path": cmd_vault_path,
     "report-dir": cmd_report_dir,
+    "template-path": cmd_template_path,
     "tracks": cmd_tracks,
     "rotation-pick": cmd_rotation_pick,
     "past-themes": cmd_past_themes,

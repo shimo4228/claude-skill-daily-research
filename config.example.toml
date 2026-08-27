@@ -30,10 +30,14 @@ min_sources = 5
 # daily: set `daily = true` on a line to run it EVERY morning in addition to the
 # rotation (the line is excluded from the rotation cycle; rotation-pick outputs
 # the rotated line first, then all daily lines).
+# template: optional project-relative path to a per-line report template
+# (section structure). Defaults to templates/report-template.md when omitted;
+# an unreadable path falls back to the default at runtime (ADR-0015).
 
 [tracks.example_line]
 name = "Example Line 前進"
 # daily = true  # uncomment to run this line every day instead of in rotation
+# template = "templates/report-template-example.md"  # per-line section structure override
 focus = "example-repo line の外部動向の解説と repo への含意"
 aliases = []
 context_files = [".notes/TASKS.md", "docs/manifesto.md"]

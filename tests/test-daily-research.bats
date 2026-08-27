@@ -96,14 +96,39 @@ teardown() {
   grep -q '発見のノルマは無い' "$PROJECT_DIR/prompts/repo-research-protocol.md"
 }
 
-@test "template requires conclusion, background, implication, and fixed tail sections" {
-  grep -q '冒頭に結論' "$PROJECT_DIR/templates/report-template.md"
+@test "template requires event-first lead, background, implication, and fixed tail sections" {
+  grep -q '冒頭は外部の出来事から' "$PROJECT_DIR/templates/report-template.md"
   grep -q '初見の読者向けの背景' "$PROJECT_DIR/templates/report-template.md"
   grep -q 'この repo への含意' "$PROJECT_DIR/templates/report-template.md"
   ! grep -q 'theme_rank' "$PROJECT_DIR/templates/report-template.md"
   grep -q '## 機会メモ' "$PROJECT_DIR/templates/report-template.md"
   grep -q '## ソース' "$PROJECT_DIR/templates/report-template.md"
   grep -q '失効日' "$PROJECT_DIR/templates/report-template.md"
+}
+
+@test "edge template is story-first with steal-section and fixed tail sections" {
+  local T="$PROJECT_DIR/templates/report-template-edge.md"
+  [ -f "$T" ]
+  grep -q '事件から始める' "$T"
+  grep -q '## 盗める手筋' "$T"
+  # 逆リード・台帳神学の節は持たない
+  ! grep -q '## 結論' "$T"
+  ! grep -q '## この repo への含意' "$T"
+  # 機械検査 (ctl-016) 対象の固定 2 節は共通テンプレと同じく必須
+  grep -q '## 機会メモ' "$T"
+  grep -q '## ソース' "$T"
+  grep -q '失効日' "$T"
+}
+
+@test "protocol carries the reader-contract style rules (6 items)" {
+  grep -q '文体規律' "$PROJECT_DIR/prompts/repo-research-protocol.md"
+  grep -q '第一文は外部の出来事' "$PROJECT_DIR/prompts/repo-research-protocol.md"
+  grep -q '一文一命題' "$PROJECT_DIR/prompts/repo-research-protocol.md"
+}
+
+@test "orchestrator resolves per-track template with fallback to common template" {
+  grep -q 'template-path' "$SCRIPT"
+  grep -q 'LINE_TEMPLATE' "$SCRIPT"
 }
 
 # === Config files exist ===

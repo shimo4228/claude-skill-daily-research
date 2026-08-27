@@ -282,6 +282,48 @@ def test_line_brief_unknown_track_errors(monkeypatch, capsys):
     assert "unknown track" in err
 
 
+# === template-path (per-track テンプレート上書き) ===
+
+
+@pytest.mark.unit
+def test_template_path_defaults_to_common_template(monkeypatch, capsys):
+    rc, out, _ = run_cmd(monkeypatch, capsys, ["template-path", CONFIG, "akc"])
+    assert rc == 0
+    assert out.strip() == "templates/report-template.md"
+
+
+@pytest.mark.unit
+def test_template_path_returns_track_override(monkeypatch, capsys, tmp_path):
+    cfg = tmp_path / "with-template.toml"
+    cfg.write_text(
+        '[tracks.edge]\nname = "Edge"\ndaily = true\n'
+        'template = "templates/report-template-edge.md"\n'
+        '[[tracks.edge.repos]]\nkey = "edge"\ntarget_repo = "/nonexistent/edge"\n'
+    )
+    rc, out, _ = run_cmd(monkeypatch, capsys, ["template-path", str(cfg), "edge"])
+    assert rc == 0
+    assert out.strip() == "templates/report-template-edge.md"
+
+
+@pytest.mark.unit
+def test_template_path_non_string_errors(monkeypatch, capsys, tmp_path):
+    cfg = tmp_path / "bad-template.toml"
+    cfg.write_text(
+        '[tracks.a]\nname = "A"\ntemplate = 3\n'
+        '[[tracks.a.repos]]\nkey = "a"\ntarget_repo = "/nonexistent/a"\n'
+    )
+    rc, _, err = run_cmd(monkeypatch, capsys, ["template-path", str(cfg), "a"])
+    assert rc == 1
+    assert "template must be a string" in err
+
+
+@pytest.mark.unit
+def test_template_path_unknown_track_errors(monkeypatch, capsys):
+    rc, _, err = run_cmd(monkeypatch, capsys, ["template-path", CONFIG, "nope"])
+    assert rc == 1
+    assert "unknown track" in err
+
+
 # === rotation-pick (ADR-0010) ===
 
 

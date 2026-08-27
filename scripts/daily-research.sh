@@ -124,6 +124,8 @@ if [ -z "$REPORT_DIR" ]; then
 fi
 
 # 共通注入素材 (テンプレート / 過去テーマ履歴)
+# TEMPLATE は既定 (共通テンプレート)。[tracks.<x>].template を持つ line は
+# ループ内で LINE_TEMPLATE に上書き解決される (template-path subcommand)。
 TEMPLATE=$(cat "$PROJECT_DIR/templates/report-template.md")
 PAST_THEMES=$(python3 "$DR_PY" past-themes 2>> "$LOG_FILE") \
   || PAST_THEMES="(過去テーマ履歴の生成失敗。past_topics.json を Read して重複を確認すること)"
@@ -232,6 +234,19 @@ else
   LINE_BRIEF=$(python3 "$DR_PY" line-brief "$PROJECT_DIR/config.toml" "$TRACK" 2>> "$LOG_FILE") \
     || LINE_BRIEF="(line-brief 生成失敗。config.toml を Read して line 定義を確認すること)"
 
+  # per-track テンプレート ([tracks.<x>].template)。解決失敗・ファイル欠損は
+  # 既定テンプレートへ fallback (レポートが出ないより節構成が旧いほうがまし)。
+  LINE_TEMPLATE="$TEMPLATE"
+  TEMPLATE_REL=$(python3 "$DR_PY" template-path "$PROJECT_DIR/config.toml" "$TRACK" 2>> "$LOG_FILE") || TEMPLATE_REL=""
+  if [ -n "$TEMPLATE_REL" ] && [ "$TEMPLATE_REL" != "templates/report-template.md" ]; then
+    if LINE_TEMPLATE=$(cat "$PROJECT_DIR/$TEMPLATE_REL" 2>> "$LOG_FILE"); then
+      log "Template override for $TRACK: $TEMPLATE_REL"
+    else
+      LINE_TEMPLATE="$TEMPLATE"
+      log "WARN: template $TEMPLATE_REL が読めない — 既定テンプレートで続行"
+    fi
+  fi
+
   LINE_PROMPT="今日のデイリーリサーチ (per-repo line 実行) を、システムプロンプトに追記された
 per-repo リサーチ・プロトコルに厳密に従って実行してください。
 
@@ -258,7 +273,7 @@ $PAST_THEMES
 
 ## レポートテンプレート (この構造に厳密に従う)
 
-$TEMPLATE"
+$LINE_TEMPLATE"
 
   # ファイル書き込みは vault レポート dir / state dir / past_topics.json のみに path 制限する
   # (permission 層でも repo read-only を強制)。file permission の path 規則は
